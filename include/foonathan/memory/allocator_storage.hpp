@@ -237,6 +237,13 @@ namespace foonathan
                 auto&&                        alloc = get_allocator();
                 return traits::max_alignment(alloc);
             }
+
+            DLContext context() const
+            {
+                std::lock_guard<actual_mutex> lock(*this);
+                auto&&                        alloc = get_allocator();
+                return traits::context(alloc);
+            }
             /// @}
 
             /// @{
@@ -721,6 +728,11 @@ namespace foonathan
                     return max(query::alignment);
                 }
 
+                DLContext context() const
+                {
+                    return context_impl();
+                }
+
                 virtual bool is_composable() const FOONATHAN_NOEXCEPT = 0;
 
             protected:
@@ -732,6 +744,7 @@ namespace foonathan
                 };
 
                 virtual std::size_t max(query q) const = 0;
+                virtual DLContext context_impl() const = 0;
             };
 
         public:
@@ -902,6 +915,12 @@ namespace foonathan
                     else if (q == query::array_size)
                         return traits::max_array_size(alloc);
                     return traits::max_alignment(alloc);
+                }
+
+                DLContext context_impl() const override
+                {
+                    auto&& alloc = get();
+                    return traits::context(alloc);
                 }
             };
 

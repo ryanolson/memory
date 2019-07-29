@@ -333,6 +333,11 @@ namespace foonathan
             {
                 return traits::max_alignment(get_allocator());
             }
+
+            DLContext context() const
+            {
+                return traits::context(get_allocator());
+            }
             /// @}
 
             /// @{

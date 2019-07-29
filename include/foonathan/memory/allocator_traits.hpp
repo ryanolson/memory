@@ -15,6 +15,8 @@
 #include "detail/utility.hpp"
 #include "config.hpp"
 
+#include <dlpack/dlpack.h>
+
 #if FOONATHAN_HOSTED_IMPLEMENTATION
 #include <memory>
 #endif
@@ -282,6 +284,20 @@ namespace foonathan
             {
                 return detail::max_alignment;
             }
+
+            //=== context ===//
+            // first try Allocator::context,
+            // otherwise default to {kDLCPU, 0}
+            template <class Allocator>
+            auto context(full_concept, const Allocator& alloc)
+                -> FOONATHAN_AUTO_RETURN_TYPE(alloc.context(), DLContext)
+
+                template <class Allocator>
+                DLContext context(min_concept, const Allocator&)
+                {
+                    return {kDLCPU, 0};
+                }
+
         } // namespace traits_detail
 
         /// The default specialization of the allocator_traits for a \concept{concept_rawallocator,RawAllocator}.
@@ -358,6 +374,14 @@ namespace foonathan
                               "Allocator cannot be used as RawAllocator because it provides custom "
                               "construct()/destroy()");
                 return traits_detail::max_alignment(traits_detail::full_concept{}, state);
+            }
+
+            static DLContext context(const allocator_type& state)
+            {
+                static_assert(allocator_is_raw_allocator<Allocator>::value,
+                              "Allocator cannot be used as RawAllocator because it provides custom "
+                              "construct()/destroy()");
+                return traits_detail::context(traits_detail::full_concept{}, state);
             }
 
 #if !defined(DOXYGEN)
