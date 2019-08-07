@@ -25,6 +25,11 @@ namespace foonathan
 {
     namespace memory
     {
+
+        // we can define a policy memory_type
+        // this can hold methods to fill memory, etc.
+        struct host_memory {};
+
         namespace detail
         {
             template <class Allocator>
@@ -285,15 +290,22 @@ namespace foonathan
                 return detail::max_alignment;
             }
 
-            //=== context ===//
+            //=== memory_type ===//
+            template <class Allocator>
+            auto memory_type(full_concept) -> decltype(typename Allocator::memory_type{});
+
+                template <class Allocator>
+                auto memory_type(min_concept) -> decltype(host_memory{});
+
+            //=== device_context ===//
             // first try Allocator::context,
             // otherwise default to {kDLCPU, 0}
             template <class Allocator>
-            auto context(full_concept, const Allocator& alloc)
-                -> FOONATHAN_AUTO_RETURN_TYPE(alloc.context(), DLContext)
+            auto device_context(full_concept, const Allocator& alloc)
+                -> FOONATHAN_AUTO_RETURN_TYPE(alloc.device_context(), DLContext)
 
                 template <class Allocator>
-                DLContext context(min_concept, const Allocator&)
+                DLContext device_context(min_concept, const Allocator&)
                 {
                     return {kDLCPU, 0};
                 }
@@ -311,6 +323,8 @@ namespace foonathan
             using allocator_type = traits_detail::allocator_type<Allocator>;
             using is_stateful =
                 decltype(traits_detail::is_stateful<Allocator>(traits_detail::full_concept{}));
+            using memory_type =
+                decltype(traits_detail::memory_type<Allocator>(traits_detail::full_concept{}));
 
             static void* allocate_node(allocator_type& state, std::size_t size,
                                        std::size_t alignment)
@@ -376,12 +390,12 @@ namespace foonathan
                 return traits_detail::max_alignment(traits_detail::full_concept{}, state);
             }
 
-            static DLContext context(const allocator_type& state)
+            static DLContext device_context(const allocator_type& state)
             {
                 static_assert(allocator_is_raw_allocator<Allocator>::value,
                               "Allocator cannot be used as RawAllocator because it provides custom "
                               "construct()/destroy()");
-                return traits_detail::context(traits_detail::full_concept{}, state);
+                return traits_detail::device_context(traits_detail::full_concept{}, state);
             }
 
 #if !defined(DOXYGEN)
