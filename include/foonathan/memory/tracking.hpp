@@ -186,6 +186,7 @@ namespace foonathan
 
             using is_stateful = std::integral_constant<bool, traits::is_stateful::value
                                                                  || !std::is_empty<Tracker>::value>;
+            using memory_type = typename traits::memory_type;
 
             /// @{
             /// \effects Creates it by giving it a \concept{concept_tracker,tracker} and the tracked \concept{concept_rawallocator,RawAllocator}.
@@ -333,6 +334,11 @@ namespace foonathan
             {
                 return traits::max_alignment(get_allocator());
             }
+
+            DLContext device_context() const
+            {
+                return traits::device_context(get_allocator());
+            }
             /// @}
 
             /// @{
@@ -369,10 +375,8 @@ namespace foonathan
         auto make_tracked_allocator(Tracker t, RawAllocator&& alloc)
             -> tracked_allocator<Tracker, typename std::decay<RawAllocator>::type>
         {
-            return tracked_allocator<Tracker, typename std::decay<RawAllocator>::type>{detail::move(
-                                                                                           t),
-                                                                                       detail::move(
-                                                                                           alloc)};
+            return tracked_allocator<Tracker, typename std::decay<RawAllocator>::type>{detail::move(t),
+                                                                                       detail::move(alloc)};
         }
 
         namespace detail

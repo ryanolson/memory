@@ -45,6 +45,20 @@ namespace foonathan
             {
             }
 
+            memory_block(memory_block&& other) FOONATHAN_NOEXCEPT
+            : memory(std::exchange(other.memory, nullptr)),
+              size(std::exchange(other.size, 0u)) {}
+
+            memory_block& operator=(memory_block&& other) FOONATHAN_NOEXCEPT
+            {
+                memory = std::exchange(other.memory, nullptr);
+                size = std::exchange(other.size, 0u);
+                return *this;
+            }
+
+            memory_block(const memory_block&) = default;
+            memory_block& operator=(const memory_block&) = default;
+
             /// \returns Whether or not a pointer is inside the memory.
             bool contains(const void* address) const FOONATHAN_NOEXCEPT
             {

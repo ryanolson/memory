@@ -124,6 +124,7 @@ namespace foonathan
             using storage_policy = StoragePolicy;
             using mutex          = Mutex;
             using is_stateful    = typename traits::is_stateful;
+            using memory_type    = typename traits::memory_type;
 
             /// \effects Creates it by default-constructing the \c StoragePolicy.
             /// \requires The \c StoragePolicy must be default-constructible.
@@ -236,6 +237,13 @@ namespace foonathan
                 std::lock_guard<actual_mutex> lock(*this);
                 auto&&                        alloc = get_allocator();
                 return traits::max_alignment(alloc);
+            }
+
+            DLContext device_context() const
+            {
+                std::lock_guard<actual_mutex> lock(*this);
+                auto&&                        alloc = get_allocator();
+                return traits::device_context(alloc);
             }
             /// @}
 
@@ -721,6 +729,11 @@ namespace foonathan
                     return max(query::alignment);
                 }
 
+                DLContext device_context() const
+                {
+                    return context_impl();
+                }
+
                 virtual bool is_composable() const FOONATHAN_NOEXCEPT = 0;
 
             protected:
@@ -732,6 +745,7 @@ namespace foonathan
                 };
 
                 virtual std::size_t max(query q) const = 0;
+                virtual DLContext context_impl() const = 0;
             };
 
         public:
@@ -902,6 +916,12 @@ namespace foonathan
                     else if (q == query::array_size)
                         return traits::max_array_size(alloc);
                     return traits::max_alignment(alloc);
+                }
+
+                DLContext context_impl() const override
+                {
+                    auto&& alloc = get();
+                    return traits::context(alloc);
                 }
             };
 

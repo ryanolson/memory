@@ -46,8 +46,9 @@ namespace foonathan
             bool is_aligned(void* ptr, std::size_t alignment) FOONATHAN_NOEXCEPT;
 
             // maximum alignment value
-            FOONATHAN_CONSTEXPR std::size_t max_alignment =
-                FOONATHAN_ALIGNOF(foonathan_comp::max_align_t);
+            // TODO: make this a compile-time parameter
+            FOONATHAN_CONSTEXPR std::size_t max_alignment = 1024;
+                // FOONATHAN_ALIGNOF(foonathan_comp::max_align_t);
 #if FOONATHAN_HAS_CONSTEXPR
             static_assert(is_valid_alignment(max_alignment), "ehm..?");
 #endif

@@ -21,7 +21,9 @@
 #include <foonathan/hosted_implementation.hpp>
 
 // log prefix
+#ifndef FOONATHAN_MEMORY_LOG_PREFIX
 #define FOONATHAN_MEMORY_LOG_PREFIX "foonathan::memory"
+#endif
 
 // version
 #define FOONATHAN_MEMORY_VERSION                                                                   \
