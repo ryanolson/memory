@@ -66,6 +66,21 @@ namespace foonathan
                 auto addr = static_cast<const char*>(address);
                 return addr >= mem && addr < mem + size;
             }
+
+            std::uintptr_t distance(void* ptr)
+            {
+                if(!contains(ptr)) throw std::runtime_error("cannot compute distance - ptr not owned by block");
+                auto s = reinterpret_cast<std::uintptr_t>(memory);
+                auto e = reinterpret_cast<std::uintptr_t>(ptr);
+                return e - s;
+            }
+
+            void* offset(std::size_t distance)
+            {
+                if(distance > size) return nullptr;
+                auto mem  = static_cast<char*>(memory);
+                return mem + distance;
+            }
         };
 
         namespace detail
