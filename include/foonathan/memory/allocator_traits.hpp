@@ -28,7 +28,10 @@ namespace foonathan
 
         // we can define a policy memory_type
         // this can hold methods to fill memory, etc.
-        struct host_memory {};
+        struct host_memory
+        {
+            constexpr static DLDeviceType device_type() { return kDLCPU; }
+        };
 
         namespace detail
         {
@@ -307,7 +310,8 @@ namespace foonathan
                 template <class Allocator>
                 DLContext device_context(min_concept, const Allocator&)
                 {
-                    return {kDLCPU, 0};
+                    return {decltype(memory_type<Allocator>(full_concept{}))::device_type(), 0};
+                    //return {kDLCPU, 0};
                 }
 
         } // namespace traits_detail
